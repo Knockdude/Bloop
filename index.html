@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NubiSphere | Knowledge Hub Pro</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="Todbo icon.png">
+  
+  <!-- Estilos independientes -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- BARRA SUPERIOR PRO -->
+  <header class="topbar">
+    <div class="brand">
+      <img src="Todbo icon.png" alt="NubiSphere Logo">
+      <span>NubiSphere</span>
+    </div>
+    
+    <div class="search-container">
+      <input type="text" id="query" placeholder="Busca conocimiento, páginas web o información con IA..." onkeydown="if(event.key==='Enter') executeSearch()" />
+    </div>
+
+    <button class="btn-search" onclick="executeSearch()">Explorar</button>
+  </header>
+
+  <!-- WORKSPACE MULTIPANEL (EDGE / GOOGLE) -->
+  <div class="hub-workspace">
+    
+    <!-- PANEL IZQUIERDO: IA + RESULTADOS -->
+    <section class="knowledge-panel">
+      
+      <div class="ai-card">
+        <div class="ai-header">
+          <img src="Todbo icon.png" alt="AI Icon">
+          <span>NubiSphere AI Synthesis</span>
+        </div>
+        <div id="aiText">Escribe una búsqueda en la barra superior para procesar la web con IA nativa.</div>
+        <div class="image-grid" id="imageGrid"></div>
+      </div>
+
+      <h3 class="section-title">Fuentes y Resultados Web</h3>
+      <div class="results-list" id="resultsList"></div>
+
+    </section>
+
+    <!-- PANEL DERECHO: VISOR WEB INTERNO -->
+    <section class="browser-view">
+      <div class="browser-header">
+        <span class="browser-title">🌐 Visor de Páginas Interno</span>
+        <div class="browser-url" id="browserUrl">about:blank</div>
+      </div>
+      <iframe id="webFrame" src="about:blank"></iframe>
+    </section>
+
+  </div>
+
+  <!-- Script independiente -->
+  <script src="app.js"></script>
+</body>
+</html>
