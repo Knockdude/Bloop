@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wooble Series — Catálogo Cinematográfico</title>
+    <!-- Tailwind CSS for modern utility-first styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f4f4f6',
+                            100: '#e2e2e7',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            900: '#0f1015',
+                            950: '#08080c'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom smooth scrollbar and cinematic effects */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #08080c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f3f46;
+        }
+        .hero-gradient {
+            background: linear-gradient(0deg, #08080c 0%, rgba(8,8,12,0.7) 50%, rgba(8,8,12,0.3) 100%);
+        }
+        .card-glow:hover {
+            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-brand-950 text-gray-100 font-sans antialiased selection:bg-indigo-500 selection:text-white min-h-screen flex flex-col justify-between">
+
+    <!-- Notification / Custom Toast Box (Replaces alert) -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 ease-out bg-zinc-900 border border-zinc-800 text-white px-5 py-4 rounded-xl shadow-2xl flex items-center space-x-3">
+        <div id="toast-icon" class="text-indigo-400 text-lg">
+            <i class="fa-solid fa-circle-info"></i>
+        </div>
+        <div>
+            <p id="toast-title" class="text-sm font-semibold">Notificación</p>
+            <p id="toast-message" class="text-xs text-zinc-400">Mensaje de prueba</p>
+        </div>
+    </div>
+
+    <!-- Header / Navigation Bar -->
+    <header class="fixed top-0 left-0 right-0 z-40 bg-brand-950/80 backdrop-blur-md border-b border-zinc-800/60 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="resetFilters()">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-clapperboard text-white text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-zinc-200 to-indigo-400">WOOBLE</span>
+                    <span class="text-xs block uppercase tracking-widest text-indigo-400 font-semibold">Studios</span>
+                </div>
+            </div>
+
+            <!-- Search Bar Center -->
+            <div class="hidden md:flex items-center relative w-96">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 text-zinc-500 text-sm"></i>
+                <input type="text" id="searchInput" placeholder="Buscar series, géneros, directores..." 
+                    class="w-full bg-zinc-900/90 border border-zinc-800 rounded-full py-2.5 pl-11 pr-4 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                <button id="clearSearch" onclick="clearSearchInput()" class="absolute right-4 text-zinc-500 hover:text-zinc-300 hidden text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Links / User profile -->
+            <div class="flex items-center space-x-5">
+                <button onclick="showToast('Modo Premium', 'Tu suscripción a Wobble Ultra está activa y sincronizada.', 'success')" class="hidden sm:flex items-center space-x-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-4 py-2 rounded-full text-xs font-medium transition-all">
+                    <i class="fa-solid fa-crown text-amber-400"></i>
+                    <span>Wobble Ultra</span>
+                </button>
+                <div class="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-300 font-bold text-sm cursor-pointer hover:border-indigo-500 transition-all" onclick="showToast('Perfil de Usuario', 'Sesión iniciada como CinefiloPro@wooble.com', 'info')">
+                    WS
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Wrapper -->
+    <main class="flex-grow pt-20">
+
+        <!-- Cinematic Hero Banner Section -->
+        <section id="heroSection" class="relative h-[70vh] min-h-[500px] max-h-[750px] w-full overflow-hidden flex items-end">
+            <!-- Background Image with Overlay -->
+            <div class="absolute inset-0 z-0">
+                <img id="heroImage" src="https://placehold.co/1920x1080/121218/6366f1?text=Wooble+Studios" alt="Hero Banner" class="w-full h-full object-cover object-center transform scale-105 transition-transform duration-1000">
+                <div class="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/60 to-transparent"></div>
+                <div class="absolute inset-0 hero-gradient"></div>
+            </div>
+
+            <!-- Hero Content -->
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 w-full">
+                <div class="max-w-2xl">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <span id="heroBadge" class="bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md shadow-lg">Estreno Exclusivo</span>
+                        <div class="flex items-center text-amber-400 text-xs font-semibold space-x-1">
+                            <i class="fa-solid fa-star"></i>
+                            <span id="heroRating">9.8</span>
+                        </div>
+                        <span id="heroYear" class="text-zinc-400 text-xs font-medium">2026</span>
+                        <span id="heroSeasons" class="text-zinc-400 text-xs font-medium border-l border-zinc-700 pl-3">2 Temporadas</span>
+                    </div>
+                    <h1 id="heroTitle" class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white mb-4 drop-shadow-md">
+                        Cargando experiencia...
+                    </h1>
+                    <p id="heroDescription" class="text-zinc-300 text-sm sm:text-base leading-relaxed mb-8 line-clamp-3">
+                        Explora las producciones originales más ambiciosas de Wobble Studios con calidad cinematográfica inigualable.
+                    </p>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="openPlayerModal(currentHeroSeries)" class="bg-white hover:bg-zinc-200 text-zinc-950 font-bold px-7 py-3 rounded-xl flex items-center space-x-2.5 transition-all shadow-xl hover:scale-105">
+                            <i class="fa-solid fa-play text-sm"></i>
+                            <span>Reproducir Tráiler</span>
+                        </button>
+                        <button onclick="openDetailsModal(currentHeroSeries)" class="bg-zinc-800/80 hover:bg-zinc-800 text-white font-semibold px-6 py-3 rounded-xl backdrop-blur-md border border-zinc-700 flex items-center space-x-2 transition-all hover:scale-105">
+                            <i class="fa-solid fa-circle-info text-sm"></i>
+                            <span>Más Información</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filters & Category Navigation -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
+                <!-- Genre Pills -->
+                <div class="flex items-center space-x-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar" id="genreContainer">
+                    <button onclick="filterByGenre('Todos')" class="genre-btn bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all shadow-lg shadow-indigo-600/20" data-genre="Todos">
+                        Todos
+                    </button>
+                    <button onclick="filterByGenre('Sci-Fi')" class="genre-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-zinc-800" data-genre="Sci-Fi">
+                        Sci-Fi
+                    </button>
+                    <button onclick="filterByGenre('Drama')" class="genre-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-zinc-800" data-genre="Drama">
+                        Drama
+                    </button>
+                    <button onclick="filterByGenre('Thriller')" class="genre-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-zinc-800" data-genre="Thriller">
+                        Thriller
+                    </button>
+                    <button onclick="filterByGenre('Cyberpunk')" class="genre-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-zinc-800" data-genre="Cyberpunk">
+                        Cyberpunk
+                    </button>
+                    <button onclick="filterByGenre('Fantasía')" class="genre-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-zinc-800" data-genre="Fantasía">
+                        Fantasía
+                    </button>
+                </div>
+
+                <!-- Sort Dropdown & Results Counter -->
+                <div class="flex items-center justify-between md:justify-end space-x-4">
+                    <span id="resultsCount" class="text-xs text-zinc-500 font-medium">Mostrando 6 series</span>
+                    <div class="relative">
+                        <select id="sortSelect" onchange="sortSeries(this.value)" class="bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                            <option value="popular">Más Populares</option>
+                            <option value="rating">Mejor Calificadas</option>
+                            <option value="newest">Estrenos Recientes</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Series Grid Section -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+            <div id="seriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Javascript will populate series cards dynamically -->
+            </div>
+
+            <!-- Empty State (Hidden by default) -->
+            <div id="emptyState" class="hidden text-center py-24">
+                <div class="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-4 text-zinc-500 text-xl border border-zinc-800">
+                    <i class="fa-solid fa-film"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-1">No se encontraron producciones</h3>
+                <p class="text-zinc-500 text-xs mb-6">Intenta buscar con otros términos o selecciona otra categoría.</p>
+                <button onclick="resetFilters()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-600/30">
+                    Restablecer Filtros
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Details Modal -->
+    <div id="detailsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div id="modalContentCard" class="bg-zinc-900 border border-zinc-800 w-full max-w-3xl rounded-3xl overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300">
+            <div class="relative h-72 sm:h-80 w-full">
+                <img id="modalImage" src="" alt="Series Banner" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/40 to-transparent"></div>
+                <button onclick="closeDetailsModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 hover:bg-black text-white flex items-center justify-center transition-all border border-white/10">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="absolute bottom-6 left-6 right-6">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <span id="modalGenre" class="bg-indigo-600/80 text-white text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Sci-Fi</span>
+                        <div class="flex items-center text-amber-400 text-xs font-semibold space-x-1">
+                            <i class="fa-solid fa-star"></i>
+                            <span id="modalRating">9.5</span>
+                        </div>
+                        <span id="modalYear" class="text-zinc-400 text-xs">2026</span>
+                    </div>
+                    <h2 id="modalTitle" class="text-2xl sm:text-4xl font-extrabold text-white">Título de la Serie</h2>
+                </div>
+            </div>
+            <div class="p-6 sm:p-8 space-y-6">
+                <p id="modalDescription" class="text-zinc-300 text-sm sm:text-base leading-relaxed">Descripción detallada de la serie...</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-zinc-950/60 p-4 rounded-2xl border border-zinc-800/80 text-xs">
+                    <div>
+                        <span class="text-zinc-500 block mb-1 font-medium">Creador / Director</span>
+                        <span id="modalDirector" class="text-white font-semibold">Director Name</span>
+                    </div>
+                    <div>
+                        <span class="text-zinc-500 block mb-1 font-medium">Temporadas</span>
+                        <span id="modalSeasonsCount" class="text-white font-semibold">2 Temporadas</span>
+                    </div>
+                    <div>
+                        <span class="text-zinc-500 block mb-1 font-medium">Audio / Subtítulos</span>
+                        <span class="text-white font-semibold">Español, Inglés (Dolby Atmos)</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4 pt-2">
+                    <button id="modalPlayBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-6 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg shadow-indigo-600/30">
+                        <i class="fa-solid fa-play"></i>
+                        <span>Reproducir Ahora</span>
+                    </button>
+                    <button onclick="toggleWatchlistModal()" id="watchlistBtn" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold py-3.5 px-6 rounded-xl border border-zinc-700 flex items-center space-x-2 transition-all">
+                        <i class="fa-regular fa-bookmark"></i>
+                        <span>Mi Lista</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Simulator Modal -->
+    <div id="playerModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="relative w-full max-w-5xl bg-zinc-950 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800/80 bg-zinc-900/50">
+                <div class="flex items-center space-x-3">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span id="playerTitle" class="text-xs font-semibold text-zinc-400 ml-2">Reproduciendo — Wooble Studios</span>
+                </div>
+                <button onclick="closePlayerModal()" class="text-zinc-400 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="relative aspect-video bg-black flex flex-col items-center justify-center">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-20 h-20 rounded-full bg-indigo-600/90 hover:bg-indigo-500 flex items-center justify-center text-white text-2xl shadow-2xl shadow-indigo-500/50 cursor-pointer transition-all hover:scale-110" onclick="showToast('Reproductor', 'Transmisión simulada en Ultra HD 4K Dolby Vision.', 'success')">
+                        <i class="fa-solid fa-play ml-1"></i>
+                    </div>
+                </div>
+                <img id="playerImage" src="" class="absolute inset-0 w-full h-full object-cover opacity-30" alt="Video Placeholder">
+                <div class="absolute bottom-6 left-6 right-6 flex items-center justify-between text-zinc-400 text-xs">
+                    <div class="flex items-center space-x-4">
+                        <button class="hover:text-white"><i class="fa-solid fa-volume-high"></i></button>
+                        <span>00:00 / 48:20</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 px-2.5 py-1 rounded text-[10px] font-bold">4K HDR</span>
+                        <button class="hover:text-white"><i class="fa-solid fa-expand"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-brand-950 border-t border-zinc-800/80 py-12 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+            <div>
+                <div class="flex items-center justify-center md:justify-start space-x-3 mb-2">
+                    <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-xs">
+                        <i class="fa-solid fa-clapperboard"></i>
+                    </div>
+                    <span class="font-bold text-white tracking-wider">WOOBLE STUDIOS</span>
+                </div>
+                <p class="text-zinc-500 text-xs">Plataforma de streaming y producción cinematográfica de alta gama.</p>
+            </div>
+            <div class="flex space-x-6 text-zinc-400 text-sm">
+                <a href="#" onclick="showToast('Términos', 'Acceso exclusivo bajo licencia Wobble Ultra.', 'info')" class="hover:text-indigo-400 transition-colors">Términos</a>
+                <a href="#" onclick="showToast('Privacidad', 'Tus datos están cifrados de extremo a extremo.', 'info')" class="hover:text-indigo-400 transition-colors">Privacidad</a>
+                <a href="#" onclick="showToast('Prensa', 'Contacto de prensa: press@wooblestudios.com', 'info')" class="hover:text-indigo-400 transition-colors">Prensa</a>
+                <a href="#" onclick="showToast('Soporte', 'Asistencia técnica disponible 24/7.', 'info')" class="hover:text-indigo-400 transition-colors">Soporte</a>
+            </div>
+            <p class="text-zinc-600 text-xs">&copy; 2026 Wooble Series. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Application JavaScript Logic -->
+    <script>
+        // Database of series catalog for Wooble Studios
+        const seriesData = [
+            {
+                id: 1,
+                title: "Chronos Protocol",
+                genre: "Sci-Fi",
+                rating: 9.8,
+                year: 2026,
+                seasons: "2 Temporadas",
+                director: "Dr. Alistair Vance",
+                description: "En un futuro donde el tiempo es la moneda principal de cambio, una investigadora descubre un agujero negro cuántico que amenaza con colapsar el pasado y el futuro de la humanidad.",
+                image: "https://placehold.co/1200x700/0f1015/6366f1?text=Chronos+Protocol",
+                badge: "Estreno Mundial"
+            },
+            {
+                id: 2,
+                title: "Nebula Syndicate",
+                genre: "Cyberpunk",
+                rating: 9.4,
+                year: 2025,
+                seasons: "3 Temporadas",
+                director: "Elena Rostova",
+                description: "Las megacorporaciones gobiernan los anillos orbitales de Saturno. Un grupo de hackers renegados planea el golpe cibernético más audaz del sistema solar.",
+                image: "https://placehold.co/1200x700/181824/8b5cf6?text=Nebula+Syndicate",
+                badge: "Más Visto"
+            },
+            {
+                id: 3,
+                title: "Sombras del Abismo",
+                genre: "Thriller",
+                rating: 9.1,
+                year: 2026,
+                seasons: "1 Temporada",
+                director: "Mateo Silva",
+                description: "Tras una tormenta magnética en la fosa de las Marianas, una estación científica submarina pierde contacto con la superficie mientras investiga una señal anómala.",
+                image: "https://placehold.co/1200x700/10141f/3b82f6?text=Sombras+del+Abismo",
+                badge: "Original Wooble"
+            },
+            {
+                id: 4,
+                title: "The Alchemist Heir",
+                genre: "Fantasía",
+                rating: 9.6,
+                year: 2024,
+                seasons: "4 Temporadas",
+                director: "Kiera Knight",
+                description: "En un imperio donde la alquimia es prohibida por la Inquisición Estelar, un joven descubre pergaminos antiguos que contienen la fórmula de la inmortalidad.",
+                image: "https://placehold.co/1200x700/1f1018/ec4899?text=The+Alchemist+Heir",
+                badge: "Éxito Global"
+            },
+            {
+                id: 5,
+                title: "Quantum Paradox",
+                genre: "Sci-Fi",
+                rating: 8.9,
+                year: 2025,
+                seasons: "2 Temporadas",
+                director: "Julian Thorne",
+                description: "Paralelos temporales colisionan cuando dos versiones del mismo físico teórico se encuentran en una dimensión donde las leyes de la física cuántica operan al revés.",
+                image: "https://placehold.co/1200x700/121f18/10b981?text=Quantum+Paradox",
+                badge: "Crítica Aclamada"
+            },
+            {
+                id: 6,
+                title: "Vanguard Legacy",
+                genre: "Drama",
+                rating: 9.3,
+                year: 2026,
+                seasons: "1 Temporada",
+                director: "Sofia Laurent",
+                description: "La dinastía familiar detrás del desarrollo de la inteligencia artificial universal se desmorona cuando el patriarca deja su testamento en un contrato inteligente inviolable.",
+                image: "https://placehold.co/1200x700/1f1a10/f59e0b?text=Vanguard+Legacy",
+                badge: "Exclusivo"
+            }
+        ];
+
+        let currentHeroSeries = seriesData[0];
+        let currentFilter = 'Todos';
+        let currentSort = 'popular';
+        let searchQuery = '';
+
+        // DOM Ready Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            updateHero(currentHeroSeries);
+            renderSeries();
+
+            // Search input live listener
+            const searchInput = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('clearSearch');
+
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase().trim();
+                if(searchQuery.length > 0) {
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    clearBtn.classList.add('hidden');
+                }
+                renderSeries();
+            });
+        });
+
+        // Update Hero Banner Content
+        function updateHero(series) {
+            currentHeroSeries = series;
+            document.getElementById('heroTitle').textContent = series.title;
+            document.getElementById('heroDescription').textContent = series.description;
+            document.getElementById('heroImage').src = series.image;
+            document.getElementById('heroBadge').textContent = series.badge;
+            document.getElementById('heroRating').textContent = series.rating;
+            document.getElementById('heroYear').textContent = series.year;
+            document.getElementById('heroSeasons').textContent = series.seasons;
+        }
+
+        // Render Series Grid based on filters and sorting
+        function renderSeries() {
+            const grid = document.getElementById('seriesGrid');
+            const emptyState = document.getElementById('emptyState');
+            const resultsCount = document.getElementById('resultsCount');
+
+            // Filter series
+            let filtered = seriesData.filter(series => {
+                const matchesGenre = currentFilter === 'Todos' || series.genre === currentFilter;
+                const matchesSearch = series.title.toLowerCase().includes(searchQuery) || 
+                                      series.description.toLowerCase().includes(searchQuery) ||
+                                      series.genre.toLowerCase().includes(searchQuery);
+                return matchesGenre && matchesSearch;
+            });
+
+            // Sort series
+            if (currentSort === 'popular') {
+                filtered.sort((a, b) => b.rating - a.rating);
+            } else if (currentSort === 'rating') {
+                filtered.sort((a, b) => b.rating - a.rating);
+            } else if (currentSort === 'newest') {
+                filtered.sort((a, b) => b.year - a.year);
+            }
+
+            resultsCount.textContent = `Mostrando ${filtered.length} producciones`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            grid.innerHTML = filtered.map(series => `
+                <div onclick="updateHeroAndHighlight(${series.id})" class="group bg-zinc-900/80 border border-zinc-800 rounded-3xl overflow-hidden cursor-pointer card-glow transition-all duration-300 hover:border-indigo-500/50 hover:-translate-y-1.5 flex flex-col justify-between">
+                    <div class="relative aspect-video w-full overflow-hidden bg-zinc-950">
+                        <img src="${series.image}" alt="${series.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-80"></div>
+                        <span class="absolute top-3 left-3 bg-brand-950/80 backdrop-blur-md text-white border border-zinc-700/80 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg">
+                            ${series.genre}
+                        </span>
+                        <div class="absolute top-3 right-3 bg-brand-950/80 backdrop-blur-md text-amber-400 border border-zinc-700/80 text-xs font-bold px-2 py-1 rounded-lg flex items-center space-x-1">
+                            <i class="fa-solid fa-star text-[10px]"></i>
+                            <span>${series.rating}</span>
+                        </div>
+                    </div>
+                    <div class="p-6 flex flex-col flex-grow justify-between">
+                        <div>
+                            <div class="flex items-center justify-between text-xs text-zinc-500 mb-2 font-medium">
+                                <span>${series.year}</span>
+                                <span>${series.seasons}</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-2 group-hover:text-indigo-400 transition-colors">${series.title}</h3>
+                            <p class="text-zinc-400 text-xs line-clamp-2 leading-relaxed mb-4">${series.description}</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-4 border-t border-zinc-800/80">
+                            <button onclick="event.stopPropagation(); openDetailsModalById(${series.id})" class="text-xs font-semibold text-zinc-300 hover:text-white flex items-center space-x-1.5 transition-colors">
+                                <i class="fa-solid fa-circle-info text-indigo-400"></i>
+                                <span>Detalles</span>
+                            </button>
+                            <button onclick="event.stopPropagation(); openPlayerModalById(${series.id})" class="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all border border-indigo-500/30 flex items-center space-x-1.5">
+                                <i class="fa-solid fa-play text-[10px]"></i>
+                                <span>Ver</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filter by Genre
+        function filterByGenre(genre) {
+            currentFilter = genre;
+            document.querySelectorAll('.genre-btn').forEach(btn => {
+                if(btn.dataset.genre === genre) {
+                    btn.className = "genre-btn bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all shadow-lg shadow-indigo-600/20";
+                } else {
+                    btn.className = "genre-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-zinc-800";
+                }
+            });
+            renderSeries();
+        }
+
+        // Sort Series
+        function sortSeries(sortType) {
+            currentSort = sortType;
+            renderSeries();
+        }
+
+        // Clear search input
+        function clearSearchInput() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearch').classList.add('hidden');
+            searchQuery = '';
+            renderSeries();
+        }
+
+        // Reset all filters
+        function resetFilters() {
+            clearSearchInput();
+            filterByGenre('Todos');
+            document.getElementById('sortSelect').value = 'popular';
+            currentSort = 'popular';
+        }
+
+        // Hero highlight click
+        function updateHeroAndHighlight(id) {
+            const series = seriesData.find(s => s.id === id);
+            if(series) {
+                updateHero(series);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showToast('Hero Actualizado', `Mostrando destacados: ${series.title}`, 'info');
+            }
+        }
+
+        // Details Modal Functions
+        function openDetailsModalById(id) {
+            const series = seriesData.find(s => s.id === id);
+            if(series) openDetailsModal(series);
+        }
+
+        function openDetailsModal(series) {
+            document.getElementById('modalImage').src = series.image;
+            document.getElementById('modalGenre').textContent = series.genre;
+            document.getElementById('modalRating').textContent = series.rating;
+            document.getElementById('modalYear').textContent = series.year;
+            document.getElementById('modalTitle').textContent = series.title;
+            document.getElementById('modalDescription').textContent = series.description;
+            document.getElementById('modalDirector').textContent = series.director;
+            document.getElementById('modalSeasonsCount').textContent = series.seasons;
+            
+            document.getElementById('modalPlayBtn').onclick = () => {
+                closeDetailsModal();
+                openPlayerModal(series);
+            };
+
+            const modal = document.getElementById('detailsModal');
+            const card = document.getElementById('modalContentCard');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-95');
+            card.classList.add('scale-100');
+        }
+
+        function closeDetailsModal() {
+            const modal = document.getElementById('detailsModal');
+            const card = document.getElementById('modalContentCard');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+        }
+
+        // Watchlist toggle simulation
+        function toggleWatchlistModal() {
+            const btn = document.getElementById('watchlistBtn');
+            if(btn.classList.contains('bg-indigo-600')) {
+                btn.className = "bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold py-3.5 px-6 rounded-xl border border-zinc-700 flex items-center space-x-2 transition-all";
+                btn.innerHTML = '<i class="fa-regular fa-bookmark"></i><span>Mi Lista</span>';
+                showToast('Mi Lista', 'Eliminado de tu lista personal.', 'info');
+            } else {
+                btn.className = "bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3.5 px-6 rounded-xl flex items-center space-x-2 transition-all";
+                btn.innerHTML = '<i class="fa-solid fa-bookmark"></i><span>En Mi Lista</span>';
+                showToast('Mi Lista', 'Añadido exitosamente a tu lista.', 'success');
+            }
+        }
+
+        // Video Player Modal Functions
+        function openPlayerModalById(id) {
+            const series = seriesData.find(s => s.id === id);
+            if(series) openPlayerModal(series);
+        }
+
+        function openPlayerModal(series) {
+            document.getElementById('playerTitle').textContent = `Reproduciendo — ${series.title} (${series.seasons})`;
+            document.getElementById('playerImage').src = series.image;
+            const modal = document.getElementById('playerModal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closePlayerModal() {
+            const modal = document.getElementById('playerModal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // Custom Toast Notification System (replaces alert)
+        function showToast(title, message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+
+            if(type === 'success') {
+                toastIcon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+            } else {
+                toastIcon.innerHTML = '<i class="fa-solid fa-circle-info text-indigo-400"></i>';
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
